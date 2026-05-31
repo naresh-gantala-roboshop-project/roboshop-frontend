@@ -7,7 +7,8 @@ run:
 	npm run dev
 
 docker-build:
-	docker build -t roboshop-frontend .
+	docker build -t nareshroboshop.azurecr.io/roboshop-frontend .
+	docker push nareshroboshop.azurecr.io/roboshop-frontend
 
 clean:
 	rm -rf node_modules .next
