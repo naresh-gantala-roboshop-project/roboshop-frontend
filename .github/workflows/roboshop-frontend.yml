@@ -1,0 +1,39 @@
+name: roboshop-frontend
+run-name: roboshop-frontend 🚀
+on: [push, workflow_dispatch]
+jobs:
+  build-stage:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Push Docker Image
+        run: |
+          export IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          make docker-build
+
+  test-stage:
+    needs: build-stage
+    runs-on: self-hosted
+    steps:
+      - run: echo "test stage started"
+      - run: pwd
+
+  deploy-stage:
+    needs: test-stage
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone Helm Repo
+        run: |
+          rm -rf /tmp/learn-helm
+          git clone https://${{ secrets.GH_PAT }}@github.com/nareshgantala/learn-helm.git /tmp/learn-helm
+
+      - name: Helm Upgrade frontend
+        run: |
+          export IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          helm upgrade --install frontend /tmp/learn-helm \
+            -f /tmp/learn-helm/values/frontend.yaml \
+            --namespace roboshop-dev \
+            --set app_name=frontend \
+            --set image_tag="${IMAGE_TAG}"

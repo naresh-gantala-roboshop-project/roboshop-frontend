@@ -1,0 +1,28 @@
+name: cart-ci pipeline
+run-name: cart-ci pipeline
+on:
+    pull_request:
+        branches:
+            - main
+        types: [opened, synchronize, reopened]
+jobs:
+    lint:
+        runs-on: self-hosted
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+            - name: Install dependencies
+              run: npm ci
+            - name: Run linter
+              run: npm run lint
+
+    test:
+        needs: lint
+        runs-on: self-hosted
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+            - name: Install dependencies
+              run: npm ci
+            - name: Run tests
+              run: npm test
